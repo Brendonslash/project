@@ -1,0 +1,83 @@
+.SUFFIXES: .cpp .hpp
+
+SHARED_LIB=FALSE
+FILENAME=mymake
+
+
+#target names
+NOLIBEXE=build_4_exe
+LIBEXE=cs296_4_exelib
+
+#
+SRCFILES=./src/*.cpp
+HEADERFILES=./src/*.hpp
+NOMAINSRCFILES=$(subst ./src/main.cpp,,$(SRCFILES))
+
+# Library Paths
+BOX2D_ROOT=./external
+GLUI_ROOT=/usr
+GL_ROOT=/usr/include/
+
+#Libraries
+#LIBS = -lBox2D -lglui -framework GLUT -framework OpenGL
+LIBS = -lBox2D -lglui -lglut -lGLU -lGL
+
+# Compiler and Linker flags
+CPPFLAGS =-g -O3 -Wall -fno-strict-aliasing
+CPPFLAGS+=-I $(BOX2D_ROOT)/include -I $(GLUI_ROOT)/include
+LDFLAGS+=-L $(BOX2D_ROOT)/lib -L $(GLUI_ROOT)/lib
+
+.PHONY: setup exe obj
+
+setup:
+	mkdir -p ./mybins ./myobjs ./mylibs; \
+	if [ ! -d ./external/include/Box2D ] || [ ! -d ./external/lib/libBox2D.a ]; then \
+	if [ ! -d ./external/src/Box2D ]; then \
+	tar xzf ./external/src/Box2D.tgz; \
+	mv Box2D ./external/src/; \
+	fi; \
+	mkdir -p ./external/src/Box2D/build296; \
+	cd ./external/src/Box2D/build296; \
+	cmake ../; \
+	make; \
+	make install; \
+	fi;
+
+obj: setup $(SRCFILES) $(HEADERFILES)
+	g++ -fPIC $(CPPFLAGS) -c $(SRCFILES) -MD; \
+	mv *.o *.d ./myobjs;
+
+OBJFILES=./myobjs/*.o
+NOMAINOBJFILES=./myobjs/callbacks.o ./myobjs/cs296_base.o ./myobjs/dominos.o ./myobjs/render.o
+
+-include $(OBJFILES:.o=.d)
+
+exe: setup obj
+	g++ -o build_4_exe $(CPPFLAGS) $(LDFLAGS) $(OBJFILES) $(LIBS); \
+	mv cs296_4_exe ./mybins;
+
+staticlib: setup obj
+	ar rvs libCS296test.a $(NOMAINOBJFILES); \
+	mv libCS296test.a ./mylibs/; \
+	cd ..; \
+
+sharedlib: setup obj
+	g++ -shared -o libCS296test.so $(NOMAINOBJFILES); \
+	mv libCS296test.so ./mylibs/; \
+
+exelib: setup $(SRCFILES) $(HEADERFILES)
+	if [ $(SHARED_LIB) = FALSE ]; then \
+	make -f $(FILENAME) staticlib; \
+	g++ -o ./mybins/cs296_4_exelib $(CPPFLAGS) $(LDFLAGS) -L ./mylibs/ ./myobjs/main.o ./mylibs/libCS296test.a $(LIBS); \
+	else \
+	make -f $(FILENAME) sharedlib; \
+	g++ -o ./mybins/cs296_4_exelib $(CPPFLAGS) $(LDFLAGS) -L ./mylibs/ ./myobjs/main.o ./mylibs/libCS296test.so $(LIBS); \
+	fi; \
+
+clean:
+	rm -R -f ./mylibs ./myobjs ./mybins *.o *.d; \
+	echo "Cleaning up.. Done" \
+
+distclean: clean
+	rm -R -f ./external/src/Box2D ./external/lib/* ./external/include/*; \
+	echo "Cleaning up Box2D stuff... Done" \

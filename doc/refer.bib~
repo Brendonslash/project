@@ -1,0 +1,14 @@
+@article{bullet,
+author = "ghantauke",
+address = "http://www.latex-community.org/forum/viewtopic.php?f=44&t=12143"
+}
+
+@article{rotation,
+author= "Wikipedia",
+address = "http://en.wikipedia.org/wiki/Rotation_around_a_fixed_axis"
+}
+
+@article{latex,
+author = "Andrew Roberts",
+address = "http://www.andy-roberts.net/writing/latex"
+}

@@ -1,0 +1,61 @@
+.SUFFIXES: .cpp .hpp
+
+LIBS = -lBox2D -lglui -lglut -lGLU -lGL
+
+CPPFLAGS =-g -O3 -Wall -fno-strict-aliasing
+CPPFLAGS+=-I ./external/include -I /usr/include
+LDFLAGS+=-L ./external/lib -L /usr/lib
+
+SOURCES := $(wildcard src/*.cpp)
+OBJECTS := $(SOURCES:src/%.cpp=myobjs/%.o)
+
+SHARED_LIB = TRUE
+
+.PHONY: setup exe
+
+all: setup static_lib dynamic_lib
+
+
+setup:
+	mkdir -p myobjs mylibs mybins
+	if [ ! -d external/include/Box2D ]; \
+	then \
+	tar xzf external/src/Box2D.tgz --directory external/src; \
+	mkdir external/src/Box2D/build296; \
+	cd external/src/Box2D/build296; \
+	cmake ../; \
+	make; \
+	make install; \
+	fi;
+
+$(OBJECTS) : myobjs/%.o : src/%.cpp
+	g++ $(CPPFLAGS) -fPIC -c $< -o $@ -MD
+	
+exe: $(OBJECTS)
+	g++ -o mybins/build_22_exe $(LDFLAGS) myobjs/*.o $(LIBS)
+
+LIB_OBJECTS = $(OBJECTS)
+LIB_OBJECTS-= myobjs/main.o
+
+static_lib: $(OBJECTS)
+ifeq ($(SHARED_LIB),FALSE)
+	ar rvs mylibs/libCS296test.a $(LIB_OBJECTS)
+endif
+
+dynamic_lib: $(OBJECTS)
+ifeq ($(SHARED_LIB),TRUE)
+	g++ -shared -o mylibs/libCS296test.so $(LIB_OBJECTS)
+endif
+
+exe_lib: $(OBJECTS)
+ifeq ($(SHARED_LIB),FALSE)
+	g++ -o mybins/cs296_22_exelib $(LDFLAGS) myobjs/main.o mylibs/libCS296test.a $(LIBS)
+else
+	g++ -o mybins/cs296_22_exelib myobjs/main.o $(LDFLAGS) mylibs/libCS296test.so $(LIBS)
+endif
+
+clean:
+	rm -r myobjs mybins mylibs
+
+distclean: clean
+	rm -r external/include/* external/lib/* external/src/Box2D
