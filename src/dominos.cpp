@@ -21,6 +21,13 @@
  * Department of Computer Science and Engineering, IIT Bombay
  * Instructor: Parag Chaudhuri
  */
+ 
+ /* Category and masked bits -
+  * 0x002 for wheels,
+  * 0x003 for rods,
+  * 0x001 for base line
+  * Wheels should collide with base line, Rods should collide with base line[Just in case]
+  */
 
 
 #include "cs296_base.hpp"
@@ -38,72 +45,189 @@ using namespace std;
 #include "dominos.hpp"
 
 namespace cs296
-{
-  /**  
-   * The is the constructor 
-   * This is the documentation block for the constructor.
-   */ 
-  
+{	  
   dominos_t::dominos_t()
   {
-    //Ground
-    /*!  
-     * \section sec Blocks of objects
-     * \subsection a17 common datatypes
-     * There are some common data types used repeatedly.
-     * There are data types used in defining the shape of object more precisely entity such as
-     * \li \b "b2EdgeShape" for shapes resembling edges or line segments.This class has Set(float,float) 
-     * as a member function,it takes the starting and the ending positions as inputs giving the line joining them as output.
-     * \li \b "b2PolygonShape" for defining Polygons.This class contains SetasBox(float,float) as a member function to set the width 
-     * and height of the box if the shape is a rectangle.
-     * \li \b "b2CircleShape" for defining Circles,so it obviously will have radius(float),center(vec2(float,float)) variables in it.
-     * 
-     * \b "b2RevoluteJointDef" is datatype for defining revolute joints. It is created using
-     * a member function Initialise(bodyA, bodyB, anchor).
-     * 
-     * \b m_world defines the world in which the objects interact.It basically is the universe in which the entities are present.
-     * There can be multiple worlds.
-     * 
-     * \b "b2BodyDef" is the data type used to define the body.
-     * 
-     * \b "b2FixtureDef" defines the fixture of the body.Fixture is defined for a particular Body.It contains the properties of the 
-     * body such as mass,restitution,state etc,mostly everything except the dimensions of the body(that is shape).
-     * 
-     * \b "CreateFixture" helps Create a fixture which is defined with some particular propreties.
-     * 
-     */ 
-    b2Body* b1;  
-    {
-      /*!
-       * \subsection a16 Ground
-       * \li \b "b1" is the pointer to the class which contains the properties of Ground like its fixture,shape and state.
-       * \li \b "shape" defines its shape,here it is a line segment so b2EdgeShape is used.
-       * \li \b "bd" variable sets the body of Ground. 
-       */
-      b2EdgeShape shape; 
-      shape.Set(b2Vec2(-90.0f, 0.0f), b2Vec2(90.0f, 0.0f));
-      b2BodyDef bd; 
-      b1 = m_world->CreateBody(&bd); 
-      b1->CreateFixture(&shape, 0.0f);
-    }
-    
-	 {
-	  b2Body* sphere;
+     
+	{
+	  b2Body* ground;
+	  b2EdgeShape shape;
+	  shape.Set(b2Vec2(-200.0f, 0.0f), b2Vec2(200.0f, 0.0f));
+	  b2FixtureDef fd;
+	  fd.shape=&shape;
+	  fd.filter.categoryBits=0x001;
+	  fd.filter.maskBits=0xFFFF;
+	  b2BodyDef bd;
+	  ground = m_world->CreateBody(&bd);
+	  ground->CreateFixture(&fd);
+	      
+     //A sphere and a rectangular block attached to it
+	  b2Body* sphere1;
 	  b2CircleShape circle;
-	  circle.m_radius=100.0;
-	  b2FixtureDef ballfd;
-	  ballfd.shape=&circle;
-	  ballfd.density = 5.0f;
-      ballfd.friction = 1.0f;
-      ballfd.restitution = 0.5f;
-      b2BodyDef ballbd;
-      ballbd.type=b2_dynamicBody;
-      ballbd.position.Set(0.0f,100.f);
-      sphere=m_world->CreateBody(&ballbd);
-      sphere->CreateFixture(&ballfd);
-    }
+	  circle.m_radius=20.0;
+	  b2FixtureDef ballfd1;
+	  ballfd1.shape=&circle;
+	  ballfd1.density = 5.0f;
+      ballfd1.friction = 1.0f;
+      ballfd1.restitution = 0.5f;
+      ballfd1.filter.categoryBits=0x002;
+      ballfd1.filter.maskBits=0x001|0x002;
+      b2BodyDef ballbd1;
+      ballbd1.type=b2_dynamicBody;
+      ballbd1.position.Set(-25.f,20.f);
+      sphere1=m_world->CreateBody(&ballbd1);
+      sphere1->CreateFixture(&ballfd1);
     
-    }
+      b2Body* smallbox1;
+	  b2PolygonShape shape1;
+	  shape1.SetAsBox(1.f,7.5f);
+	  b2FixtureDef fd1;
+	  fd1.shape=&shape1;
+	  fd1.filter.categoryBits=0x003;
+	  fd1.filter.maskBits=0x001;
+	  b2BodyDef bd1;
+	  bd1.type=b2_dynamicBody;
+	  bd1.position.Set(-25.f,12.5f);
+	  smallbox1=m_world->CreateBody(&bd1);
+	  smallbox1->CreateFixture(&fd1);
+	  
+	  b2RevoluteJointDef jointDef1;
+	  jointDef1.bodyA=sphere1;
+	  jointDef1.bodyB=smallbox1;
+	  jointDef1.localAnchorA.Set(0,0);
+	  jointDef1.localAnchorB.Set(0,7.5);
+	 // jointDef.collideConnected=false;
+	  //jointdef.Initialize(sphere,smallbox,sphere->GetLocalCenter());
+	  m_world->CreateJoint(&jointDef1);
+      
+     //A sphere and a rectangular block attached to it
+	  b2Body* sphere2;
+	  b2CircleShape circle2;
+	  circle2.m_radius=20.0;
+	  b2FixtureDef ballfd2;
+	  ballfd2.shape=&circle2;
+	  ballfd2.density = 5.0f;
+      ballfd2.friction = 1.0f;
+      ballfd2.restitution = 0.5f;
+      ballfd2.filter.categoryBits=0x002;
+      ballfd2.filter.maskBits=0x001;
+      b2BodyDef ballbd2;
+      ballbd2.type=b2_dynamicBody;
+      ballbd2.position.Set(20.f,20.f);
+      sphere2=m_world->CreateBody(&ballbd2);
+      sphere2->CreateFixture(&ballfd2);
+    
+      b2Body* smallbox2;
+	  b2PolygonShape shape2;
+	  shape2.SetAsBox(1.f,7.5f);
+	  b2FixtureDef fd2;
+	  fd2.shape=&shape2;
+	  fd2.filter.categoryBits=0x003;
+	  fd2.filter.maskBits=0x001;
+	  b2BodyDef bd2;
+	  bd2.type=b2_dynamicBody;
+	  bd2.position.Set(20.f,12.5f);
+	  smallbox2=m_world->CreateBody(&bd2);
+	  smallbox2->CreateFixture(&fd2);
+	  
+	  b2RevoluteJointDef jointDef2;
+	  jointDef2.bodyA=sphere2;
+	  jointDef2.bodyB=smallbox2;
+	  jointDef2.localAnchorA.Set(0,0);
+	  jointDef2.localAnchorB.Set(0,7.5);
+	 // jointDef.collideConnected=false;
+	  //jointdef.Initialize(sphere,smallbox,sphere->GetLocalCenter());
+	  m_world->CreateJoint(&jointDef2);
+      
+   //A sphere and a rectangular block attached to it
+	  b2Body* sphere3;
+	  b2CircleShape circle3;
+	  circle3.m_radius=20.0;
+	  b2FixtureDef ballfd3;
+	  ballfd3.shape=&circle3;
+	  ballfd3.density = 5.0f;
+      ballfd3.friction = 1.0f;
+      ballfd3.restitution = 0.5f;
+      ballfd3.filter.categoryBits=0x002;
+      ballfd3.filter.maskBits=0x001;
+      b2BodyDef ballbd3;
+      ballbd3.type=b2_dynamicBody;
+      ballbd3.position.Set(65.f,20.f);
+      sphere3=m_world->CreateBody(&ballbd3);
+      sphere3->CreateFixture(&ballfd3);
+    
+      b2Body* smallbox3;
+	  b2PolygonShape shape3;
+	  shape3.SetAsBox(1.f,7.5f);
+	  b2FixtureDef fd3;
+	  fd3.shape=&shape3;
+	  fd3.filter.categoryBits=0x003;
+	  fd3.filter.maskBits=0x001;
+	  b2BodyDef bd3;
+	  bd3.type=b2_dynamicBody;
+	  bd3.position.Set(65.f,12.5f);
+	  smallbox3=m_world->CreateBody(&bd3);
+	  smallbox3->CreateFixture(&fd3);
+	  
+	  b2RevoluteJointDef jointDef3;
+	  jointDef3.bodyA=sphere3;
+	  jointDef3.bodyB=smallbox3;
+	  jointDef3.localAnchorA.Set(0,0);
+	  jointDef3.localAnchorB.Set(0,7.5);
+	 // jointDef.collideConnected=false;
+	  //jointdef.Initialize(sphere,smallbox,sphere->GetLocalCenter());
+	  m_world->CreateJoint(&jointDef3);
+	  
+	  b2Body* rod;
+	  b2PolygonShape rodshape;
+	  rodshape.SetAsBox(45.f,1.f);
+	  b2FixtureDef rfd;
+	  rfd.shape=&rodshape;
+	  rfd.filter.categoryBits=0x003;
+	  rfd.filter.maskBits=0x001;
+	  b2BodyDef rbd;
+	  rbd.type=b2_dynamicBody;
+	  rbd.position.Set(20.f,6.f);
+	  rod=m_world->CreateBody(&rbd);
+	  rod->CreateFixture(&rfd);
+	  
+	  b2RevoluteJointDef jointDef4,jointDef5,jointDef6;
+	  jointDef4.bodyA=smallbox1;
+	  jointDef5.bodyA=smallbox2;
+	  jointDef6.bodyA=smallbox3;
+	  jointDef4.bodyB=rod;
+	  jointDef5.bodyB=rod;
+	  jointDef6.bodyB=rod;
+	  jointDef4.localAnchorA.Set(0,-7.5);
+	  jointDef5.localAnchorA.Set(0,-7.5);
+	  jointDef6.localAnchorA.Set(0,-7.5);
+	  jointDef4.localAnchorB.Set(-45,0);
+	  jointDef5.localAnchorB.Set(0,0);
+	  jointDef6.localAnchorB.Set(45,0);
+	  m_world->CreateJoint(&jointDef4);
+	  m_world->CreateJoint(&jointDef5);
+	  m_world->CreateJoint(&jointDef6);
+	}
+	{
+		b2Body* sphere1;
+	  b2CircleShape circle;
+	  circle.m_radius=20.0;
+	  b2FixtureDef ballfd1;
+	  ballfd1.shape=&circle;
+	  ballfd1.density = 5.0f;
+      ballfd1.friction = 1.0f;
+      ballfd1.restitution = 0.5f;
+      ballfd1.filter.categoryBits=0x002;
+      ballfd1.filter.maskBits=0x001|0x002;
+      b2BodyDef ballbd1;
+      ballbd1.type=b2_dynamicBody;
+      ballbd1.position.Set(-40.f,80.f);
+      sphere1=m_world->CreateBody(&ballbd1);
+      sphere1->CreateFixture(&ballfd1);
+  }
+	
+		
+	}
 
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
 }
