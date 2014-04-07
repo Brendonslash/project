@@ -1,4 +1,4 @@
-
+#include <iostream>
 #include "cs296_base.hpp"
 #include "render.hpp"
 
@@ -12,13 +12,16 @@
 using namespace std;
 
 #include "dominos.hpp"
+//#include "main.cpp"
 
 #include <math.h>
 
 
+cs296::settings_t settings;
+
+
 
 #define  DEGTORAD 0.0174532925199432957f
-
 
 struct point{
   float x;
@@ -28,6 +31,12 @@ struct point{
     x=a;
     y=b;
   }
+
+  point(b2Vec2 v){
+    x=v.x;
+    y=v.y;
+  }
+
 
   float distance(point p){
     return sqrt(pow(x-p.x,2) + pow(y-p.y,2));
@@ -48,6 +57,72 @@ struct point{
 
 namespace cs296
 {
+
+
+    b2Body* wheel1;
+    b2Body* wheel2;
+    b2Body* wheel3;
+    b2Body* WheelConnection;
+    b2Body* Flycrank;
+    b2Body* Flycrankrod;
+    b2Body* SupportFlycrank;
+    b2Body* staticsupport;
+    b2Body* staticbardown;
+    b2Body* staticbarup;
+    b2Body* lowerpiston;
+    b2Body* upperpiston;
+    b2Body* longarm;
+    b2Body* Unionlink;
+    b2Body* Combinationlever;
+    b2Body* Radiusbar;
+    b2Body* Liftinglink;
+    b2Body* armrest;
+    b2Body* Liftingarm;
+    b2Body* Reversearm;
+    b2Body* Renchrod;
+    b2Body* pistonrest;
+    b2RevoluteJointDef j;
+    b2Joint* desjoin;
+    b2Body* Box;
+
+    b2Body* help1;
+    b2Body* help2;
+    
+
+/*
+    void dominos_t :: keyboard(unsigned char key)
+    {
+        switch(key){
+
+          case('q'):
+            point p1(help1->GetPosition());
+            point p2(help2->GetPosition());
+            float theta1 = atan((22.0-p1.y)/(21.5-p1.x));
+            float theta2 =  atan((p2.y-p1.y)/p2.x-p1.x);
+            float theta = theta1 - theta2 + (3.14)/2;
+
+            point p( p1.x - (p1.distance(p2)/2 * sin(theta1+ (3.14/2))) ,p1.y - (p1.distance(p2)/2 * cos(theta1 + (3.14/2))));
+            
+            cout<<theta2/DEGTORAD<<theta1/DEGTORAD<<endl;
+            cout<<p1.x<<p1.y<<endl;
+            cout<<p2.x<<p2.y<<endl;
+
+            armrest->SetTransform( armrest->GetPosition(), -1 );
+
+
+            Radiusbar->SetTransform(b2Vec2(p.x,p.y),theta);
+            m_world->DestroyJoint(desjoin);
+            wheel1->SetAngularVelocity(5);
+            wheel2->SetAngularVelocity(5);
+            wheel3->SetAngularVelocity(5);
+            j.Initialize(Radiusbar,SupportFlycrank,b2Vec2(21.5,22.0));
+            desjoin = m_world->CreateJoint(&j);
+            break;
+          
+          
+        }
+
+    }*/
   /**  
    * The is the constructor 
    * This is the documentation block for the constructor.
@@ -96,19 +171,9 @@ namespace cs296
       b1->CreateFixture(&shape, 0.0f);
     }
 
-    b2Body* wheel1;
-    b2Body* wheel2;
-    b2Body* wheel3;
-    b2Body* WheelConnection;
-    b2Body* Flycrank;
-    b2Body* Flycrankrod;
-    b2Body* SupportFlycrank;
-    b2Body* staticsupport;
-    b2Body* staticbardown;
-    b2Body* staticbarup;
-    b2Body* lowerpiston;
-    b2Body* longarm;
 
+    b2RevoluteJointDef cj;
+    b2Vec2 anc;
 
     float angvel = -5;
 
@@ -120,13 +185,12 @@ namespace cs296
       circle.m_radius=10.0;
       b2FixtureDef ballfd;
       ballfd.shape=&circle;
-      ballfd.density = 0.0f;
+      ballfd.density = 10.0f;
       ballfd.friction = 0.0f;
       ballfd.restitution = 0.5f;
-      ballfd.filter.groupIndex = -1;
       ballfd.filter.maskBits= 0x0000;
       b2BodyDef ballbd;
-      ballbd.type=b2_dynamicBody;
+      ballbd.type=b2_kinematicBody;
 
 
       ballbd.position.Set(-22.0f,10.0f);
@@ -150,6 +214,7 @@ namespace cs296
 
     //revolute joint at centers of wheels
 
+
     {
 
       b2CircleShape circle;
@@ -163,8 +228,6 @@ namespace cs296
       
       anchor.Set(-22.0f, 10.0f);
       jd.Initialize(wheel1, body1, anchor);
-      jd.enableMotor = true;
-      jd.motorSpeed = 12000.0;
       m_world->CreateJoint(&jd);
 
 
@@ -173,8 +236,6 @@ namespace cs296
 
       anchor.Set(0.0f, 10.0f);
       jd.Initialize(wheel2, body2, anchor);
-      jd.enableMotor = true;
-      jd.motorSpeed = 12000.0;
       m_world->CreateJoint(&jd); 
 
       bd.position.Set(22.0f, 10.0f);
@@ -182,8 +243,6 @@ namespace cs296
 
       anchor.Set(22.0f, 10.0f);
       jd.Initialize(wheel3, body3, anchor);
-      jd.enableMotor = true;
-      jd.motorSpeed = 12000.0;
       m_world->CreateJoint(&jd); 
 
     }
@@ -202,7 +261,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits= 0x0000;
       WheelConnection->CreateFixture(fd);
 
       b2RevoluteJointDef jd;
@@ -237,7 +296,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits= 0x0000;
       Flycrank->CreateFixture(fd);
       
 
@@ -248,12 +307,9 @@ namespace cs296
       jd.Initialize(Flycrank, WheelConnection, anchor);
       m_world->CreateJoint(&jd);
 
-      b2RevoluteJointDef jd1;
-      b2Vec2 anchor1;
-
-      anchor1.Set(2*sqrt(2),7.0+2*sqrt(2));
-      jd1.Initialize(Flycrank, wheel2, anchor1);
-      m_world->CreateJoint(&jd1);
+      anchor.Set(2*sqrt(2),7.0+2*sqrt(2));
+      jd.Initialize(Flycrank, wheel2, anchor);
+      m_world->CreateJoint(&jd);
     }
 
     //flycrankrod
@@ -270,12 +326,12 @@ namespace cs296
       bd.position.Set(0.0f, 9.0f);
       bd.type = b2_dynamicBody;
       Flycrankrod = m_world->CreateBody(&bd);
-      Flycrankrod->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2) * DEGTORAD);
+      Flycrankrod->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
       b2FixtureDef *fd = new b2FixtureDef;
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits= 0x0000;
       Flycrankrod->CreateFixture(fd);
       
 
@@ -294,30 +350,27 @@ namespace cs296
       b2BodyDef *bd = new b2BodyDef;
       bd->type = b2_dynamicBody;
       bd->position.Set(0,0);
-
-      b2FixtureDef *fd1 = new b2FixtureDef;
-      fd1->density = 1.0;
-      fd1->friction = 0.5;
-      fd1->restitution = 0.f;
-      fd1->shape = new b2PolygonShape;
-      fd1->filter.groupIndex = -1;
-      b2PolygonShape bs1;
-      bs1.SetAsBox(2,0.5,b2Vec2(21.5f,12.5f), 90 * DEGTORAD);
-      fd1->shape = &bs1;
-
-      b2FixtureDef *fd2 = new b2FixtureDef;
-      fd2->density = 1.0;
-      fd2->friction = 0.5;
-      fd2->restitution = 0.f;
-      fd2->filter.groupIndex = -1;
-      fd2->shape = new b2PolygonShape;
-      b2PolygonShape bs2;
-      bs2.SetAsBox(3,0.5,b2Vec2(21.5f,17.5f), 90 * DEGTORAD);
-      fd2->shape = &bs2;
-
       SupportFlycrank = m_world->CreateBody(bd);
-      SupportFlycrank->CreateFixture(fd1);
-      SupportFlycrank->CreateFixture(fd2);
+
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.0;
+      fd->friction = 0.5;
+      fd->restitution = 0.f;
+      fd->filter.groupIndex = -1;
+
+      fd->shape = new b2PolygonShape;
+      b2PolygonShape bs;
+      bs.SetAsBox(2,0.5,b2Vec2(21.5f,12.5f), 90 * DEGTORAD);
+      fd->shape = &bs;
+      SupportFlycrank->CreateFixture(fd);
+
+
+      fd->shape = new b2PolygonShape;
+      fd->filter.groupIndex = 1;
+      bs.SetAsBox(5,0.5,b2Vec2(21.5f,19.5f), 90 * DEGTORAD);
+      fd->shape = &bs;
+      SupportFlycrank->CreateFixture(fd);
+
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
@@ -342,10 +395,10 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits= 0x0000;
+
       staticsupport->CreateFixture(fd);
       
-
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
       
@@ -358,7 +411,7 @@ namespace cs296
 
     {
       b2PolygonShape shape;
-      shape.SetAsBox(10.0f, 0.25f);
+      shape.SetAsBox(8.0f, 0.25f);
   
       b2BodyDef bd;
       bd.type = b2_staticBody;
@@ -368,13 +421,15 @@ namespace cs296
       fd->shape = &shape;
       fd->filter.groupIndex = -1;
 
-      bd.position.Set(36.0f, 8.0f);
+      bd.position.Set(34.0f, 8.0f);
       staticbardown = m_world->CreateBody(&bd);
       staticbardown->CreateFixture(fd);
 
-      bd.position.Set(36.0f, 12.0f);
+      bd.position.Set(34.0f, 12.0f);
       staticbarup = m_world->CreateBody(&bd);
       staticbarup->CreateFixture(fd);
+
+
 
     }
 
@@ -392,7 +447,7 @@ namespace cs296
       fd->density = 1.0;
       fd->friction = 0.5;
       fd->restitution = 0.f;
-      fd->filter.groupIndex = 1;
+      fd->filter.groupIndex = -1;
 
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs1;
@@ -402,23 +457,40 @@ namespace cs296
 
 
       fd->shape = new b2PolygonShape;
+      fd->filter.groupIndex = 1;
       b2PolygonShape bs2;
       bs2.SetAsBox(1.5,1.75,b2Vec2(32.0f,10.0f), 0);
       fd->shape = &bs2;
       lowerpiston->CreateFixture(fd);
 
       fd->shape = new b2PolygonShape;
+      fd->filter.groupIndex = -1;
       b2PolygonShape bs3;
       bs3.SetAsBox(3.0f,0.25f,b2Vec2(32.0f,8.0f), 0);
       fd->shape = &bs3;
       lowerpiston->CreateFixture(fd);
-      /*
+      
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs4;
-      bs4.SetAsBox(10.0f,0.25f,b2Vec2(42.0f,10.0f), 0);
+      bs4.SetAsBox(7.0f,0.25f,b2Vec2(40.5f,10.0f), 0);
+      fd->filter.maskBits = 0x0000;
       fd->shape = &bs4;
       lowerpiston->CreateFixture(fd);
-      */
+      
+//////////////////////////////////////////////////////////////////////////////////////////// take care
+      fd->filter.maskBits = 0x0001;
+      fd->filter.groupIndex = 1;
+      fd->shape = new b2PolygonShape;
+      b2PolygonShape bs5;
+      bs5.SetAsBox(0.25f,3.0f,b2Vec2(47.75f,10.0f),0);
+      fd->shape = &bs5;
+      lowerpiston->CreateFixture(fd);
+
+      fd->shape = new b2PolygonShape;
+      b2PolygonShape bs6;
+      bs6.SetAsBox(1.0f,1.0f,b2Vec2(32.0f,6.75f),0);
+      fd->shape = &bs6;
+      lowerpiston->CreateFixture(fd);
 
     }
 
@@ -453,7 +525,7 @@ namespace cs296
       fd->density = 1.0;
       fd->friction = 0.0;
       fd->restitution = 1.0f;
-      fd->filter.groupIndex = 1;
+      fd->filter.maskBits= 0x0000;
 
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs;
@@ -472,11 +544,462 @@ namespace cs296
       anchor.Set(30.5f,10.0f);
       jd.Initialize(longarm, lowerpiston, anchor);
       m_world->CreateJoint(&jd);   
-       
 
    } 
 
+   //armrest
+   {
+      
+      b2CircleShape circle;
+      circle.m_radius=1.0;
+      b2FixtureDef ballfd;
+      ballfd.shape=&circle;
+      ballfd.density = 10.0f;
+      ballfd.friction = 0.0f;
+      ballfd.restitution = 0.5f;
+      ballfd.filter.maskBits= 0x0000;
+      b2BodyDef ballbd;
+      ballbd.type=b2_kinematicBody;
 
+
+      ballbd.position.Set(24.0f,28.0f);
+      armrest=m_world->CreateBody(&ballbd);
+      armrest->CreateFixture(&ballfd);
+
+   }
+
+   //Unionlink
+   {
+      b2PolygonShape shape;
+
+      point p1(32.0,5.75);
+      point p2(38.0,7.0);
+
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Unionlink = m_world->CreateBody(&bd);
+      Unionlink->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      //fd->filter.groupIndex = -1;
+      fd->filter.maskBits= 0x0000;
+      Unionlink->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(32.0,5.75);
+      jd.Initialize(Unionlink, lowerpiston, anchor);
+      m_world->CreateJoint(&jd);
+
+   }
+
+   //Combinationlever
+   {
+      b2PolygonShape shape;
+
+      point p2(39.0,21.0);
+      point p1(38.0,7.0);
+
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Combinationlever = m_world->CreateBody(&bd);
+      Combinationlever->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Combinationlever->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(38.0,7.0);
+      jd.Initialize(Unionlink, Combinationlever, anchor);
+      m_world->CreateJoint(&jd);
+
+   }
+
+   //Radiusbar
+   {
+      b2PolygonShape shape;
+
+      point p1(39.0,21.0);
+      point p2(19.0,16.0);
+
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Radiusbar = m_world->CreateBody(&bd);
+      Radiusbar->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Radiusbar->CreateFixture(fd);
+
+      shape.SetAsBox(0.01,0.01);
+      help1 = m_world->CreateBody(&bd);
+      help1->SetTransform(b2Vec2(39.0,21.0),0);
+
+      shape.SetAsBox(0.01,0.01);
+      help2 = m_world->CreateBody(&bd);
+      help2->SetTransform(b2Vec2(19.0,16.0),0);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(39.0,21.0);
+
+      jd.Initialize(Combinationlever, Radiusbar, anchor);
+      m_world->CreateJoint(&jd);
+
+      anchor.Set(21.5,135/8);
+      jd.Initialize(SupportFlycrank, Radiusbar, anchor);
+      desjoin = m_world->CreateJoint(&jd);
+
+      anchor.Set(39.0,21.0);
+      jd.Initialize(help1, Radiusbar, anchor);
+      desjoin = m_world->CreateJoint(&jd);
+
+      anchor.Set(19.0,16.0);
+      jd.Initialize(help2, Radiusbar, anchor);
+      desjoin = m_world->CreateJoint(&jd);
+
+
+   }
+
+   //Liftinglink
+   {
+     b2PolygonShape shape;
+
+      point p2(17.0,24.0);
+      point p1(19.0,16.0);
+
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Liftinglink = m_world->CreateBody(&bd);
+      Liftinglink->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Liftinglink->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(19.0,16.0);
+      jd.Initialize(Liftinglink, Radiusbar, anchor);
+      m_world->CreateJoint(&jd);
+   }
+
+   //Liftingarm
+
+   
+   {
+      point p1(17.0,24.0);
+      point p2(24.0f, 28.0f);
+
+      b2PolygonShape shape;
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Liftingarm = m_world->CreateBody(&bd);
+      Liftingarm->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Liftingarm->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(17.0,24.0);
+      jd.Initialize(Liftinglink, Liftingarm, anchor);
+      m_world->CreateJoint(&jd);
+
+      b2WeldJointDef* weldJointDef = new b2WeldJointDef();
+      weldJointDef->Initialize(Liftingarm, armrest, b2Vec2(24.0,28.0));
+      m_world->CreateJoint(weldJointDef);
+
+      anchor.Set(24.0f, 28.0f);
+      jd.Initialize(armrest, Liftingarm, anchor);
+      m_world->CreateJoint(&jd);
+
+   }
+
+   //Reversearm
+   {
+      point p2(24.0,28.0);
+      point p1(28.0f, 24.0f);
+
+      b2PolygonShape shape;
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_dynamicBody;
+      Reversearm = m_world->CreateBody(&bd);
+      Reversearm->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Reversearm->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(24.0f, 28.0f);
+      jd.Initialize(armrest, Reversearm, anchor);
+      m_world->CreateJoint(&jd);
+
+      anchor.Set(25.0f, 27.0f);
+      jd.Initialize(armrest, Reversearm, anchor);
+      m_world->CreateJoint(&jd);
+
+      
+   }
+
+   //Renchrod
+   {
+      point p2(5.0,24.0);
+      point p1(28.0f, 24.0f);
+
+      b2PolygonShape shape;
+      shape.SetAsBox( p1.distance(p2)/2 ,0.25) ;
+  
+      b2BodyDef bd;
+      bd.position.Set(0.0f, 9.0f);
+      bd.type = b2_kinematicBody;
+      Renchrod = m_world->CreateBody(&bd);
+      Renchrod->SetTransform(b2Vec2(p1.cenx(p2),p1.ceny(p2)), p1.angle(p2));
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.maskBits= 0x0000;
+      Renchrod->CreateFixture(fd);
+      
+
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+      
+      anchor.Set(28.0f, 28.0f);
+      jd.Initialize(armrest, Renchrod, anchor);
+      m_world->CreateJoint(&jd);
+   }
+
+   //upperpiston
+   {
+
+      b2BodyDef *bd = new b2BodyDef;
+      bd->type = b2_dynamicBody;
+      bd->position.Set(0,0);
+      upperpiston = m_world->CreateBody(bd);
+
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.0;
+      fd->friction = 0.5;
+      fd->restitution = 0.f;
+      //fd->filter.groupIndex = -1;
+      fd->filter.maskBits = 0x0000;
+      fd->shape = new b2PolygonShape;
+      b2PolygonShape bs;
+
+      bs.SetAsBox(4.0f,0.25f,b2Vec2(42.8,19.0f), 0);
+      fd->shape = &bs;
+      
+      upperpiston->CreateFixture(fd);
+
+///////////////////////////////////////////////////////////////////////////takecare of maskbits when u add particles
+      
+      b2RevoluteJointDef jd;
+      b2Vec2 anchor;
+
+      fd->filter.groupIndex = 1;
+      bs.SetAsBox(2.0f,2.25f,b2Vec2(48.8,19.0f), 0);
+      fd->shape = &bs;
+      upperpiston->CreateFixture(fd);      
+
+      
+      anchor.Set(38.8, 19.0f);
+      jd.Initialize(upperpiston, Combinationlever, anchor);
+      m_world->CreateJoint(&jd);
+
+
+      upperpiston->ApplyForce( b2Vec2(-1000,0) , b2Vec2(43-(1/7),19),true);
+
+   }
+
+
+
+  //Box
+    {
+
+      b2PolygonShape shape;
+      shape.SetAsBox(4.5f, 0.25f);
+  
+      b2BodyDef bd;
+      bd.type = b2_staticBody;
+      b2FixtureDef *fd = new b2FixtureDef;
+      fd->density = 1.f;
+      fd->friction = 0.0f;
+      fd->restitution = 1.f;
+      fd->shape = new b2PolygonShape;
+      fd->shape = &shape;
+      fd->filter.groupIndex = 1;
+
+
+      b2PolygonShape poly;
+      b2Vec2 vertices[4];
+      vertices[0].Set(47.8-1.5,16.75);
+      vertices[1].Set(47.8-2.5,13.25);
+      vertices[2].Set(47.8+1.5,16.75);
+      vertices[3].Set(47.8+2.5,13.25);
+      poly.Set(vertices, 4);
+
+      
+      bd.position.Set(0, 0);
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8-2.5,16.75-0.1);
+      vertices[1].Set(47.8-3.5,13.25);
+      vertices[2].Set(47.8-3.5,16.75-0.1);
+      vertices[3].Set(47.8-3.5,16.75-0.1);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8+2.5,16.75-0.1);
+      vertices[1].Set(47.8+3.5,13.25);
+      vertices[2].Set(47.8+3.5,16.75-0.1);
+      vertices[3].Set(47.8+3.5,16.75-0.1);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+
+      vertices[0].Set(47.8-3.5,6.75);
+      vertices[1].Set(47.8-3.5,16.75);
+      vertices[2].Set(47.8-4.5,16.75);
+      vertices[3].Set(47.8-4.5,6.75);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8+3.5,6.75);
+      vertices[1].Set(47.8+3.5,16.75);
+      vertices[2].Set(47.8+4.5,16.75);
+      vertices[3].Set(47.8+4.5,6.75);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8+4.5,6.75);
+      vertices[1].Set(47.8+4.5,21.25);
+      vertices[2].Set(47.8+5.5,21.25);
+      vertices[3].Set(47.8+5.5,6.75);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8-4.5,6.75);
+      vertices[1].Set(47.8-4.5,21.25);
+      vertices[2].Set(47.8-5.5,21.25);
+      vertices[3].Set(47.8-5.5,6.75);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8-5.5,6.75);
+      vertices[1].Set(47.8+5.5,6.75);
+      vertices[2].Set(47.8+5.5,5.75);
+      vertices[3].Set(47.8-5.5,5.75);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+      vertices[0].Set(47.8-5.5,21.25);
+      vertices[1].Set(47.8+5.5,21.25);
+      vertices[2].Set(47.8+5.5,22.25);
+      vertices[3].Set(47.8-5.5,22.25);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+
+      Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);
+
+
+    }
+
+
+    //////I will add steam inlets and outlets afterwards
   }
 
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
