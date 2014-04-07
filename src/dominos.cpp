@@ -190,7 +190,7 @@ namespace cs296
       ballfd.restitution = 0.5f;
       ballfd.filter.maskBits= 0x0000;
       b2BodyDef ballbd;
-      ballbd.type=b2_kinematicBody;
+      ballbd.type=b2_dynamicBody;
 
 
       ballbd.position.Set(-22.0f,10.0f);
@@ -997,10 +997,46 @@ namespace cs296
 
 
     }
-
+ /*   {
+	  b2CircleShape circle;
+	  circle.m_radius=0.5f;
+	  b2BodyDef bd;
+	  bd.type=b2_dynamicBody;
+	  b2FixtureDef fd;
+	  fd.shape=&circle;
+	  fd.restitution=1;
+	  fd.density=100000;
+	  
+	  for(int i=0;i<20;i++){
+	  bd.position.Set(50.f,10.f);
+	//  ball[i]=m_world->CreateBody(&bd);
+	//  fd1[i]=ball[i]->CreateFixture(&fd);
+	 // ball[i]->SetLinearVelocity(b2Vec2(-50,0));
+	  ball[i]->SetGravityScale(0);
+	} 
+   } */ 
 
     //////I will add steam inlets and outlets afterwards
   }
-
+	 void dominos_t::step(settings_t* settings1){
+	  base_sim_t::step(settings1);  /*
+	  for(int i=0;i<20;i++){
+	  if(ball[i]->GetWorldCenter().y<-5.75){ 
+		  ball[i]->DestroyFixture(fd1[i]);
+		  b2CircleShape circle;
+		  circle.m_radius=0.5f;
+		  b2BodyDef bd;
+		  bd.type=b2_dynamicBody;
+		  bd.position.Set(45.6f,10.f);
+		  ball[i]=m_world->CreateBody(&bd);
+		  b2FixtureDef fd;
+		  fd.shape=&circle;
+		  fd.restitution=1;
+		  fd.density=100000;
+		  ball[i]->CreateFixture(&fd);
+		  ball[i]->SetLinearVelocity(b2Vec2(100,0));
+	  }
+	} */
+  } 
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
 }
