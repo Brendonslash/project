@@ -198,7 +198,7 @@ namespace cs296
       b2FixtureDef ballfd;
       ballfd.shape=&circle;
       ballfd.density = 10.0f;
-      ballfd.friction = 0.5f;
+      ballfd.friction = 0.0f;
       ballfd.restitution = 0.5f;
       ballfd.filter.maskBits= 0x0000;
       b2BodyDef ballbd;
@@ -514,8 +514,8 @@ namespace cs296
 
       b2FixtureDef *fd = new b2FixtureDef;
       fd->density = 1.0;
-      fd->friction = 0.5;
-      fd->restitution = 0.f;
+      fd->friction = 0;
+      fd->restitution = 1.f;
       fd->filter.maskBits = 0x0000;
 
       fd->shape = new b2PolygonShape;
@@ -550,6 +550,8 @@ namespace cs296
       b2PolygonShape bs5;
       bs5.SetAsBox(0.25f,3.0f,b2Vec2(47.75f,10.0f),0);
       fd->shape = &bs5;
+      fd->filter.categoryBits=0x0005;
+      fd->filter.maskBits=0x0006|0x0003;
       lowerpiston->CreateFixture(fd);
 
       fd->shape = new b2PolygonShape;
@@ -559,7 +561,7 @@ namespace cs296
       lowerpiston->CreateFixture(fd);
 
 
-    //  lowerpiston->SetLinearVelocity( b2Vec2(-10,0));
+    //  lowerpiston->SetLinearVelocity( b2Vec2(-100,0));
 
     }
 
@@ -912,8 +914,8 @@ namespace cs296
 
       b2FixtureDef *fd = new b2FixtureDef;
       fd->density = 1.0;
-      fd->friction = 0.5;
-      fd->restitution = 0.f;
+      fd->friction = 0;
+      fd->restitution = 1.f;
       fd->filter.maskBits = 0x0000;
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs;
@@ -930,6 +932,8 @@ namespace cs296
 jd.collideConnected = false;
       bs.SetAsBox(2.0f,2.0f,b2Vec2(48.8,19.0f), 0);
       fd->shape = &bs;
+      fd->filter.categoryBits=0x0005;  ///////////////////////////////////////////
+      fd->filter.maskBits=0x0006 | 0x0003;      /////////////////////////////////////////////////
       upperpiston->CreateFixture(fd);      
 
       
@@ -962,7 +966,6 @@ jd.collideConnected = false;
       m_world->CreateJoint(&prismaticJointDef2);
     }
 
-//ffffffffffffffffffffffffffffffffffffffffffff
 
   //Box
     {
@@ -979,14 +982,15 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       //fd->filter.groupIndex = 1;
-      fd->filter.maskBits = 0x0000;
+      fd->filter.maskBits = 0x0006;
+      fd->filter.categoryBits=0x0003;
 
       b2PolygonShape poly;
       b2Vec2 vertices[4];
       vertices[0].Set(47.8-1.5,16.75);
-      vertices[1].Set(47.8-2.5,13.25);
+      vertices[1].Set(47.8-1.5,13.25);
       vertices[2].Set(47.8+1.5,16.75);
-      vertices[3].Set(47.8+2.5,13.25);
+      vertices[3].Set(47.8+1.5,13.25);
       poly.Set(vertices, 4);
 
       
@@ -997,7 +1001,7 @@ jd.collideConnected = false;
       Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
-      vertices[0].Set(47.8-2.5,16.75-0.1);
+   /*   vertices[0].Set(47.8-2.5,16.75-0.1);
       vertices[1].Set(47.8-3.5,13.25);
       vertices[2].Set(47.8-3.5,16.75-0.1);
       vertices[3].Set(47.8-3.5,16.75-0.1);
@@ -1006,7 +1010,7 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+     // Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+2.5,16.75-0.1);
@@ -1018,8 +1022,8 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
-      Box->CreateFixture(fd);
+     // Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);  
 
 
       vertices[0].Set(47.8-3.5,6.75);
@@ -1031,7 +1035,7 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+     // Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+3.5,6.75);
@@ -1043,11 +1047,8 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
-      Box->CreateFixture(fd);
-
-      Box = m_world->CreateBody(&bd);
-      Box->CreateFixture(fd);
+     // Box = m_world->CreateBody(&bd);
+      Box->CreateFixture(fd);  */
 
       vertices[0].Set(47.8+4.5,6.75);
       vertices[1].Set(47.8+4.5,21.25);
@@ -1058,7 +1059,7 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-4.5,6.75);
@@ -1070,7 +1071,7 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-5.5,6.75);
@@ -1082,29 +1083,106 @@ jd.collideConnected = false;
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+   //   Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
-      vertices[0].Set(47.8-5.5,21.25);
-      vertices[1].Set(47.8+5.5,21.25);
-      vertices[2].Set(47.8+5.5,22.25);
+      vertices[0].Set(47.8-5.5,21.25); //  Initially it was +-5.5
+      vertices[1].Set(47.8-4.5,21.25);
+      vertices[2].Set(47.8-4.5,22.25);
       vertices[3].Set(47.8-5.5,22.25);
       poly.Set(vertices, 4);
 
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
+      Box->CreateFixture(fd);
+      
+      vertices[0].Set(47.8+4.5,21.25); //  Initially it was +-5.5
+      vertices[1].Set(47.8+5.5,21.25);
+      vertices[2].Set(47.8+5.5,25.25);
+      vertices[3].Set(47.8+4.5,25.25);
+      poly.Set(vertices, 4);
 
-      Box = m_world->CreateBody(&bd);
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+      Box->CreateFixture(fd);
+      
+      vertices[0].Set(47.8-1.5,21.25); //  Initially it was +-5.5
+      vertices[1].Set(47.8+1.5,21.25);
+      vertices[2].Set(47.8+1.5,22.25);
+      vertices[3].Set(47.8-1.5,22.25);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+      Box->CreateFixture(fd);
+      
+      vertices[0].Set(47.8+0.5,22.25); //  Initially it was +-5.5
+      vertices[1].Set(47.8+1.5,22.25);
+      vertices[2].Set(47.8+1.5,25.25);
+      vertices[3].Set(47.8+0.5,25.25);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
+      Box->CreateFixture(fd);      
+
+      vertices[0].Set(47.8+0.5,25.25); //  Initially it was +-5.5
+      vertices[1].Set(47.8+5.5,25.25);
+      vertices[2].Set(47.8+5.5,26.25);
+      vertices[3].Set(47.8+0.5,26.25);
+      poly.Set(vertices, 4);
+
+      fd->shape = new b2PolygonShape;
+      fd->shape = &poly;
       Box->CreateFixture(fd);
 
-
     }
+    
+    {
+		b2CircleShape shape;
+		shape.m_radius=0.3f;
+		b2BodyDef bd;
+		bd.position.Set(47.8+3,24);
+		bd.type=b2_dynamicBody;
+		b2FixtureDef fd;
+		fd.shape=&shape;
+		fd.restitution=1;
+		fd.density=1000.f;
+		fd.filter.categoryBits=0x0006;
+		fd.filter.maskBits=0x0003 | 0x0005;
+		
+		for(int i=0;i<40;i++){
+			ball[i]=m_world->CreateBody(&bd);
+			fd1[i]=ball[i]->CreateFixture(&fd);
+			ball[i]->SetLinearVelocity(b2Vec2(rand()%50,rand()%50));
+		}
+		
 
-	
-    //////I will add steam inlets and outlets afterwards
   }
+}
 	
 void dominos_t::step(settings_t* settings){
-		base_sim_t::step(settings);}
+		base_sim_t::step(settings);
+		for(int i=0;i<40;i++){
+			if(ball[i]->GetWorldCenter().y>30.5){
+				b2BodyDef bd;
+				b2CircleShape shape;
+				shape.m_radius=0.3f;
+				bd.position.Set(47.8+3,24);
+				bd.type=b2_dynamicBody;
+				b2FixtureDef fd;
+				fd.shape=&shape;
+				fd.density=1000.f;
+				fd.restitution=1;
+				fd.filter.categoryBits=0x0006;
+				fd.filter.maskBits=0x0003;	
+				ball[i]->DestroyFixture(fd1[i]);
+				ball[i]=m_world->CreateBody(&bd);
+				fd1[i]=ball[i]->CreateFixture(&fd);
+				ball[i]->SetLinearVelocity(b2Vec2(rand()%50,rand()%50));
+			}
+		}
+	}
+		
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
 }
