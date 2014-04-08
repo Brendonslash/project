@@ -39,9 +39,9 @@ namespace cs296
     {
       return new dominos_t;
     }
-    void step(settings_t* settings1);
-   // b2Body* ball[20];
-   // b2Fixture* fd1[20];
+   // void step(settings_t* settings1);
+    b2Body* ball[20];
+    b2Fixture* fd1[20];
   };
 }
   

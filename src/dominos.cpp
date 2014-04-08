@@ -84,6 +84,7 @@ namespace cs296
     b2RevoluteJointDef j;
     b2Joint* desjoin;
     b2Body* Box;
+    b2Body* train;
 
     b2Body* help1;
     b2Body* help2;
@@ -904,7 +905,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+2.5,16.75-0.1);
@@ -916,7 +917,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
 
@@ -929,7 +930,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+3.5,6.75);
@@ -941,10 +942,10 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+   //   Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
-      Box = m_world->CreateBody(&bd);
+   //   Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+4.5,6.75);
@@ -956,7 +957,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+   //   Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-4.5,6.75);
@@ -968,7 +969,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-5.5,6.75);
@@ -980,7 +981,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+    //  Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-5.5,21.25);
@@ -992,51 +993,101 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-      Box = m_world->CreateBody(&bd);
+   //   Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
+      
+      Box->SetLinearVelocity(b2Vec2(10000,0));
 
 
     }
- /*   {
-	  b2CircleShape circle;
-	  circle.m_radius=0.5f;
-	  b2BodyDef bd;
-	  bd.type=b2_dynamicBody;
-	  b2FixtureDef fd;
-	  fd.shape=&circle;
-	  fd.restitution=1;
-	  fd.density=100000;
-	  
-	  for(int i=0;i<20;i++){
-	  bd.position.Set(50.f,10.f);
-	//  ball[i]=m_world->CreateBody(&bd);
-	//  fd1[i]=ball[i]->CreateFixture(&fd);
-	 // ball[i]->SetLinearVelocity(b2Vec2(-50,0));
-	  ball[i]->SetGravityScale(0);
-	} 
-   } */ 
+	
+	//train
+	{
+		b2PolygonShape shape;
+		b2Vec2 vertices[5];
+		vertices[0].Set(-30,17);
+		vertices[1].Set(-30,40);
+		vertices[2].Set(55,40);
+		vertices[3].Set(55,28);
+		vertices[4].Set(35,17);
+		shape.Set(vertices,5);
+		b2BodyDef bd;
+		bd.position.Set(0,0);
+		bd.type=b2_dynamicBody;
+		b2FixtureDef fd;
+		fd.shape=&shape;
+		fd.filter.maskBits=0x0000;
+		train=m_world->CreateBody(&bd);
+		train->CreateFixture(&fd);
+		
+		vertices[0].Set(-23,18);
+		vertices[1].Set(-21,18);
+		vertices[2].Set(-21,9);
+		vertices[3].Set(-23,9);
+		vertices[4].Set(-23,9);
+		shape.Set(vertices,5);
+		fd.shape=&shape;		
+		train->CreateFixture(&fd);
+		
+		vertices[0].Set(-1,18);
+		vertices[1].Set(1,18);
+		vertices[2].Set(1,9);
+		vertices[3].Set(-1,9);
+		vertices[4].Set(-1,9);
+		shape.Set(vertices,5);
+		fd.shape=&shape;		
+		train->CreateFixture(&fd);
+		
+		vertices[0].Set(21,18);
+		vertices[1].Set(23,18);
+		vertices[2].Set(23,9);
+		vertices[3].Set(21,9);
+		vertices[4].Set(21,9);
+		shape.Set(vertices,5);
+		fd.shape=&shape;		
+		train->CreateFixture(&fd);
+		
+		b2RevoluteJointDef rj;
+		rj.Initialize(wheel1,train,wheel1->GetWorldCenter());
+		m_world->CreateJoint(&rj);
+		
+		rj.Initialize(wheel2,train,wheel2->GetWorldCenter());
+		m_world->CreateJoint(&rj);
+		
+		rj.Initialize(wheel3,train,wheel3->GetWorldCenter());
+		m_world->CreateJoint(&rj);
+		
+	/*	b2RevoluteJointDef rj;
+		rj.bodyA=wheel1;
+		rj.bodyB=train;
+		rj.collideConnected=false;
+		rj.localAnchorA.Set(0,0);
+		rj.localAnchorB.Set(-22,10);
+		m_world->CreateJoint(&rj);
+		
+		rj.bodyA=wheel2;
+		rj.bodyB=train;
+		rj.collideConnected=false;
+		rj.localAnchorA.Set(0,0);
+		rj.localAnchorB.Set(0,10);
+		m_world->CreateJoint(&rj);
+		
+		rj.bodyA=wheel3;
+		rj.bodyB=train;
+		rj.collideConnected=false;
+		rj.localAnchorA.Set(0,0);
+		rj.localAnchorB.Set(22,10);
+		m_world->CreateJoint(&rj); */
+						
+		
+
+		
+		
+		train->SetLinearVelocity(b2Vec2(10,10));
+	}
 
     //////I will add steam inlets and outlets afterwards
   }
-	 void dominos_t::step(settings_t* settings1){
-	  base_sim_t::step(settings1);  /*
-	  for(int i=0;i<20;i++){
-	  if(ball[i]->GetWorldCenter().y<-5.75){ 
-		  ball[i]->DestroyFixture(fd1[i]);
-		  b2CircleShape circle;
-		  circle.m_radius=0.5f;
-		  b2BodyDef bd;
-		  bd.type=b2_dynamicBody;
-		  bd.position.Set(45.6f,10.f);
-		  ball[i]=m_world->CreateBody(&bd);
-		  b2FixtureDef fd;
-		  fd.shape=&circle;
-		  fd.restitution=1;
-		  fd.density=100000;
-		  ball[i]->CreateFixture(&fd);
-		  ball[i]->SetLinearVelocity(b2Vec2(100,0));
-	  }
-	} */
-  } 
+
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
 }
