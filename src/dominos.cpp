@@ -22,10 +22,14 @@ cs296::settings_t settings;
 
 
 #define  DEGTORAD 0.0174532925199432957f
-
+/*! The Point struct stores the co-ordinates of a point.  */
 struct point{
   float x;
   float y;
+	/**
+	 * The class contains various functions to manipulate and
+	 * evaluate properties of a point.
+	 */
 
   point(float a,float b){
     x=a;
@@ -38,18 +42,18 @@ struct point{
   }
 
 
-  float distance(point p){
+  float distance(point p){	//!< Distance between two points 
     return sqrt(pow(x-p.x,2) + pow(y-p.y,2));
   }
 
-  float angle(point p){
+  float angle(point p){	//!< Angle made by a line
     return atan((p.y-y)/(p.x-x));
   }
-  float cenx(point p){
+  float cenx(point p){ //!< X-cordinate of the midpoint
     return (x+p.x)/2;
   }
   
-  float ceny(point p){
+  float ceny(point p){ //!< Y-cordinate of the midpoint
     return (y+p.y)/2;
   }  
 };
@@ -84,7 +88,6 @@ namespace cs296
     b2RevoluteJointDef j;
     b2Joint* desjoin;
     b2Body* Box;
-    b2Body* train;
 
     b2Body* help1;
     b2Body* help2;
@@ -176,18 +179,26 @@ namespace cs296
     b2RevoluteJointDef cj;
     b2Vec2 anc;
 
-    float angvel = -5;
+    float angvel = 0;
 
     // wheels
       
     {      
-    
+      /**
+       * Here we define the wheels of our steam engine.
+       * The maskBits when set to 0 make an object immune to
+       * collisions. This is done because we just want the wheels to rotate
+       * because of the shaft motion and not collide with them.
+       * It has been made of type kinematic to test it when there is no steam
+       * in which case a constant angular velocity has been applied to it so that
+       * we can test the correctness of the system.
+       */
       b2CircleShape circle;
       circle.m_radius=10.0;
       b2FixtureDef ballfd;
       ballfd.shape=&circle;
       ballfd.density = 10.0f;
-      ballfd.friction = 0.0f;
+      ballfd.friction = 0.5f;
       ballfd.restitution = 0.5f;
       ballfd.filter.maskBits= 0x0000;
       b2BodyDef ballbd;
@@ -215,9 +226,13 @@ namespace cs296
 
     //revolute joint at centers of wheels
 
-
+    
+    
+      /**
+       * Revolute joints have been set at the center of the wheel
+       * to allow it to rotate and connect it to the. //Check
+       */
     {
-
       b2CircleShape circle;
       circle.m_radius=10.0;
       b2BodyDef bd;
@@ -225,25 +240,37 @@ namespace cs296
       b2Body* body1 = m_world->CreateBody(&bd);
 
       b2RevoluteJointDef jd;
-      b2Vec2 anchor;
-      
-      anchor.Set(-22.0f, 10.0f);
-      jd.Initialize(wheel1, body1, anchor);
+      jd.collideConnected = false;
+
+      jd.bodyA = wheel1;
+      jd.bodyB = body1;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,0);
+      jd.localAnchorB.Set(0,0);
+
       m_world->CreateJoint(&jd);
 
 
       bd.position.Set(0.0f, 10.0f);
       b2Body* body2 = m_world->CreateBody(&bd);
 
-      anchor.Set(0.0f, 10.0f);
-      jd.Initialize(wheel2, body2, anchor);
+      
+      jd.bodyA = wheel2;
+      jd.bodyB = body2;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,0);
+      jd.localAnchorB.Set(0,0);
+
       m_world->CreateJoint(&jd); 
 
       bd.position.Set(22.0f, 10.0f);
       b2Body* body3 = m_world->CreateBody(&bd);
 
-      anchor.Set(22.0f, 10.0f);
-      jd.Initialize(wheel3, body3, anchor);
+      jd.bodyA = wheel3;
+      jd.bodyB = body3;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,0);
+      jd.localAnchorB.Set(0,0);
       m_world->CreateJoint(&jd); 
 
     }
@@ -266,24 +293,32 @@ namespace cs296
       WheelConnection->CreateFixture(fd);
 
       b2RevoluteJointDef jd;
-      b2Vec2 anchor;
-      
-      anchor.Set(-22.0f, 7.0f);
-      jd.Initialize(wheel1, WheelConnection, anchor);
-      m_world->CreateJoint(&jd);
+      jd.collideConnected = false;
+	
+      jd.bodyA = wheel1;
+      jd.bodyB = WheelConnection;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,-3.0);
+      jd.localAnchorB.Set(-22.0,0);
+	m_world->CreateJoint(&jd);
 
-      anchor.Set(0.0f, 7.0f);
-      jd.Initialize(wheel2, WheelConnection, anchor);
-      m_world->CreateJoint(&jd);
+	jd.bodyA = wheel2;
+      jd.bodyB = WheelConnection;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,-3.0);
+      jd.localAnchorB.Set(0,0);
+	m_world->CreateJoint(&jd);
 
-      anchor.Set(22.0f, 7.0f);
-      jd.Initialize(wheel3, WheelConnection, anchor);
-      m_world->CreateJoint(&jd);
-
+	jd.bodyA = wheel3;
+      jd.bodyB = WheelConnection;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(0,-3.0);
+      jd.localAnchorB.Set(22.0,0);
+	m_world->CreateJoint(&jd);      
     }
 
     //flycrank
-
+	//later to local joint
     {
       b2PolygonShape shape;
       shape.SetAsBox(2.0f, 0.5f);
@@ -302,15 +337,30 @@ namespace cs296
       
 
       b2RevoluteJointDef jd;
-      b2Vec2 anchor;
+      /*b2Vec2 anchor;
       
       anchor.Set(0.0f, 7.0f);
+
       jd.Initialize(Flycrank, WheelConnection, anchor);
       m_world->CreateJoint(&jd);
 
       anchor.Set(2*sqrt(2),7.0+2*sqrt(2));
       jd.Initialize(Flycrank, wheel2, anchor);
-      m_world->CreateJoint(&jd);
+      m_world->CreateJoint(&jd);*/
+
+	jd.bodyA = Flycrank;
+      jd.bodyB = WheelConnection;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(-2.0,0.0);
+      jd.localAnchorB.Set(0,0);
+	m_world->CreateJoint(&jd);
+
+	jd.bodyA = Flycrank;
+      jd.bodyB = wheel2;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(2.0,0);
+      jd.localAnchorB.Set(2*sqrt(2),-3.0+2*sqrt(2));
+	m_world->CreateJoint(&jd);
     }
 
     //flycrankrod
@@ -342,7 +392,23 @@ namespace cs296
       anchor.Set(2*sqrt(2), 7.0+2*sqrt(2));
       jd.Initialize(Flycrankrod, Flycrank, anchor);
       m_world->CreateJoint(&jd);
+	/*
+	jd.bodyA = Flycrank;
+      jd.bodyB = Flycrankrod;
+      jd.collideConnected = false;
 
+      jd.localAnchorA.Set(2.0,0);
+      jd.localAnchorB.Set(-p1.distance(p2)/2,0);
+	m_world->CreateJoint(&jd);
+
+  jd.bodyA = wheel2;
+      jd.bodyB = Flycrankrod;
+      jd.collideConnected = false;
+
+      jd.localAnchorA.Set(2.0,0);
+      jd.localAnchorB.Set(-p1.distance(p2)/2,0);
+  m_world->CreateJoint(&jd);
+  */
     }
 
     //SupportFlycrank
@@ -357,7 +423,8 @@ namespace cs296
       fd->density = 1.0;
       fd->friction = 0.5;
       fd->restitution = 0.f;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits=0x0000;
+     // fd->filter.groupIndex = -1;
 
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs;
@@ -367,7 +434,7 @@ namespace cs296
 
 
       fd->shape = new b2PolygonShape;
-      fd->filter.groupIndex = 1;
+      //fd->filter.groupIndex = 1;
       bs.SetAsBox(5,0.5,b2Vec2(21.5f,19.5f), 90 * DEGTORAD);
       fd->shape = &bs;
       SupportFlycrank->CreateFixture(fd);
@@ -375,7 +442,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(21.5, 10.5);
       jd.Initialize(Flycrankrod, SupportFlycrank, anchor);
       m_world->CreateJoint(&jd);  
@@ -401,6 +468,7 @@ namespace cs296
       staticsupport->CreateFixture(fd);
       
       b2RevoluteJointDef jd;
+      jd.collideConnected = false;
       b2Vec2 anchor;
       
       anchor.Set(21.5f, 20.5);
@@ -420,7 +488,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits = 0x0000;
 
       bd.position.Set(34.0f, 8.0f);
       staticbardown = m_world->CreateBody(&bd);
@@ -448,7 +516,7 @@ namespace cs296
       fd->density = 1.0;
       fd->friction = 0.5;
       fd->restitution = 0.f;
-      fd->filter.groupIndex = -1;
+      fd->filter.maskBits = 0x0000;
 
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs1;
@@ -458,14 +526,12 @@ namespace cs296
 
 
       fd->shape = new b2PolygonShape;
-      fd->filter.groupIndex = 1;
       b2PolygonShape bs2;
-      bs2.SetAsBox(1.5,1.75,b2Vec2(32.0f,10.0f), 0);
+      bs2.SetAsBox(1.5,1.7,b2Vec2(32.0f,10.0f), 0);
       fd->shape = &bs2;
       lowerpiston->CreateFixture(fd);
 
       fd->shape = new b2PolygonShape;
-      fd->filter.groupIndex = -1;
       b2PolygonShape bs3;
       bs3.SetAsBox(3.0f,0.25f,b2Vec2(32.0f,8.0f), 0);
       fd->shape = &bs3;
@@ -479,8 +545,7 @@ namespace cs296
       lowerpiston->CreateFixture(fd);
       
 //////////////////////////////////////////////////////////////////////////////////////////// take care
-      fd->filter.maskBits = 0x0001;
-      fd->filter.groupIndex = 1;
+
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs5;
       bs5.SetAsBox(0.25f,3.0f,b2Vec2(47.75f,10.0f),0);
@@ -493,25 +558,34 @@ namespace cs296
       fd->shape = &bs6;
       lowerpiston->CreateFixture(fd);
 
+
+    //  lowerpiston->SetLinearVelocity( b2Vec2(-10,0));
+
     }
 
     //prismatic joint
-/*
-    {
+//check------------------------------------------------------------------
+   {
       b2PrismaticJointDef prismaticJointDef;
       b2Vec2 worldAxis(1,0);
+	//cout << lowerpiston->GetWorldCenter().x << endl;
+	//cout << lowerpiston->GetWorldCenter().y << endl;//debugggggg
       b2Vec2 anchor(32.0f,12.0f);
-      prismaticJointDef.Initialize(lowerpiston,staticbarup,anchor,worldAxis);
+	//b2Vec2 anc(0,0);
+      prismaticJointDef.Initialize(lowerpiston,staticbarup,anc,worldAxis);
+      prismaticJointDef.collideConnected = false;
       prismaticJointDef.lowerTranslation = 3.0f;
       prismaticJointDef.upperTranslation = 3.0f;
-      prismaticJointDef.enableLimit = true;
+      prismaticJointDef.enableLimit = false;
       prismaticJointDef.maxMotorForce   = 1.0;
       prismaticJointDef.motorSpeed = 0.0;
-      prismaticJointDef.enableMotor = true;
+      prismaticJointDef.enableMotor = false;
 
       m_world->CreateJoint(&prismaticJointDef);
-    }
-*/
+}
+
+//-----------------------------------Check
+
     //longarm ---- connection from lower piston to wheel2
 
     {
@@ -537,12 +611,21 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(0.0f, 7.0);
       jd.Initialize(longarm, WheelConnection, anchor);
       m_world->CreateJoint(&jd);
 
+
       anchor.Set(30.5f,10.0f);
+	//cout << lowerpiston->GetWorldCenter().x << endl;
+	//cout << lowerpiston->GetWorldCenter().y << endl;
+	/*jd.bodyA = longarm;
+      jd.bodyB = lowerpiston;
+      jd.collideConnected = false;
+      jd.localAnchorA.Set(p1.distance(p2)/2,0.0);
+      jd.localAnchorB.Set(22.0,0);
+	m_world->CreateJoint(&jd);*/  
       jd.Initialize(longarm, lowerpiston, anchor);
       m_world->CreateJoint(&jd);   
 
@@ -594,7 +677,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(32.0,5.75);
       jd.Initialize(Unionlink, lowerpiston, anchor);
       m_world->CreateJoint(&jd);
@@ -625,7 +708,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(38.0,7.0);
       jd.Initialize(Unionlink, Combinationlever, anchor);
       m_world->CreateJoint(&jd);
@@ -664,7 +747,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(39.0,21.0);
 
       jd.Initialize(Combinationlever, Radiusbar, anchor);
@@ -709,7 +792,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(19.0,16.0);
       jd.Initialize(Liftinglink, Radiusbar, anchor);
       m_world->CreateJoint(&jd);
@@ -740,7 +823,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(17.0,24.0);
       jd.Initialize(Liftinglink, Liftingarm, anchor);
       m_world->CreateJoint(&jd);
@@ -778,7 +861,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(24.0f, 28.0f);
       jd.Initialize(armrest, Reversearm, anchor);
       m_world->CreateJoint(&jd);
@@ -813,7 +896,7 @@ namespace cs296
 
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-      
+      jd.collideConnected = false;
       anchor.Set(28.0f, 28.0f);
       jd.Initialize(armrest, Renchrod, anchor);
       m_world->CreateJoint(&jd);
@@ -831,7 +914,6 @@ namespace cs296
       fd->density = 1.0;
       fd->friction = 0.5;
       fd->restitution = 0.f;
-      //fd->filter.groupIndex = -1;
       fd->filter.maskBits = 0x0000;
       fd->shape = new b2PolygonShape;
       b2PolygonShape bs;
@@ -845,9 +927,8 @@ namespace cs296
       
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-
-      fd->filter.groupIndex = 1;
-      bs.SetAsBox(2.0f,2.25f,b2Vec2(48.8,19.0f), 0);
+jd.collideConnected = false;
+      bs.SetAsBox(2.0f,2.0f,b2Vec2(48.8,19.0f), 0);
       fd->shape = &bs;
       upperpiston->CreateFixture(fd);      
 
@@ -857,11 +938,31 @@ namespace cs296
       m_world->CreateJoint(&jd);
 
 
-      upperpiston->ApplyForce( b2Vec2(-1000,0) , b2Vec2(43-(1/7),19),true);
+    //  upperpiston->ApplyForce( b2Vec2(-1000,0) , b2Vec2(43-(1/7),19),true);
 
    }
 
+{
+	//joint lower
+	 b2Vec2 worldAxis(1,0);
+	b2Vec2 anc(0,0);
+	b2PrismaticJointDef prismaticJointDef2;
+	//cout << upperpiston->GetWorldCenter().x << endl;
+	//cout << upperpiston->GetWorldCenter().y << endl;//debugggggg
+      //b2Vec2 anchor(32.0f,12.0f);
+      prismaticJointDef2.Initialize(upperpiston,staticbarup,anc,worldAxis);
+      prismaticJointDef2.lowerTranslation = 3.0f;
+	    prismaticJointDef2.collideConnected = false;
+      prismaticJointDef2.upperTranslation = 3.0f;
+      prismaticJointDef2.enableLimit = false;
+      prismaticJointDef2.maxMotorForce   = 1.0;
+      prismaticJointDef2.motorSpeed = 0.0;
+      prismaticJointDef2.enableMotor = false;
 
+      m_world->CreateJoint(&prismaticJointDef2);
+    }
+
+//ffffffffffffffffffffffffffffffffffffffffffff
 
   //Box
     {
@@ -877,8 +978,8 @@ namespace cs296
       fd->restitution = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      fd->filter.groupIndex = 1;
-
+      //fd->filter.groupIndex = 1;
+      fd->filter.maskBits = 0x0000;
 
       b2PolygonShape poly;
       b2Vec2 vertices[4];
@@ -905,7 +1006,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-    //  Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+2.5,16.75-0.1);
@@ -917,7 +1018,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-    //  Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
 
@@ -930,7 +1031,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-    //  Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+3.5,6.75);
@@ -942,10 +1043,10 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-   //   Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
-   //   Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8+4.5,6.75);
@@ -957,7 +1058,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-   //   Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-4.5,6.75);
@@ -969,7 +1070,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-    //  Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-5.5,6.75);
@@ -981,7 +1082,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-    //  Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
 
       vertices[0].Set(47.8-5.5,21.25);
@@ -993,101 +1094,17 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
 
-   //   Box = m_world->CreateBody(&bd);
+      Box = m_world->CreateBody(&bd);
       Box->CreateFixture(fd);
-      
-      Box->SetLinearVelocity(b2Vec2(10000,0));
 
 
     }
+
 	
-	//train
-	{
-		b2PolygonShape shape;
-		b2Vec2 vertices[5];
-		vertices[0].Set(-30,17);
-		vertices[1].Set(-30,40);
-		vertices[2].Set(55,40);
-		vertices[3].Set(55,28);
-		vertices[4].Set(35,17);
-		shape.Set(vertices,5);
-		b2BodyDef bd;
-		bd.position.Set(0,0);
-		bd.type=b2_dynamicBody;
-		b2FixtureDef fd;
-		fd.shape=&shape;
-		fd.filter.maskBits=0x0000;
-		train=m_world->CreateBody(&bd);
-		train->CreateFixture(&fd);
-		
-		vertices[0].Set(-23,18);
-		vertices[1].Set(-21,18);
-		vertices[2].Set(-21,9);
-		vertices[3].Set(-23,9);
-		vertices[4].Set(-23,9);
-		shape.Set(vertices,5);
-		fd.shape=&shape;		
-		train->CreateFixture(&fd);
-		
-		vertices[0].Set(-1,18);
-		vertices[1].Set(1,18);
-		vertices[2].Set(1,9);
-		vertices[3].Set(-1,9);
-		vertices[4].Set(-1,9);
-		shape.Set(vertices,5);
-		fd.shape=&shape;		
-		train->CreateFixture(&fd);
-		
-		vertices[0].Set(21,18);
-		vertices[1].Set(23,18);
-		vertices[2].Set(23,9);
-		vertices[3].Set(21,9);
-		vertices[4].Set(21,9);
-		shape.Set(vertices,5);
-		fd.shape=&shape;		
-		train->CreateFixture(&fd);
-		
-		b2RevoluteJointDef rj;
-		rj.Initialize(wheel1,train,wheel1->GetWorldCenter());
-		m_world->CreateJoint(&rj);
-		
-		rj.Initialize(wheel2,train,wheel2->GetWorldCenter());
-		m_world->CreateJoint(&rj);
-		
-		rj.Initialize(wheel3,train,wheel3->GetWorldCenter());
-		m_world->CreateJoint(&rj);
-		
-	/*	b2RevoluteJointDef rj;
-		rj.bodyA=wheel1;
-		rj.bodyB=train;
-		rj.collideConnected=false;
-		rj.localAnchorA.Set(0,0);
-		rj.localAnchorB.Set(-22,10);
-		m_world->CreateJoint(&rj);
-		
-		rj.bodyA=wheel2;
-		rj.bodyB=train;
-		rj.collideConnected=false;
-		rj.localAnchorA.Set(0,0);
-		rj.localAnchorB.Set(0,10);
-		m_world->CreateJoint(&rj);
-		
-		rj.bodyA=wheel3;
-		rj.bodyB=train;
-		rj.collideConnected=false;
-		rj.localAnchorA.Set(0,0);
-		rj.localAnchorB.Set(22,10);
-		m_world->CreateJoint(&rj); */
-						
-		
-
-		
-		
-		train->SetLinearVelocity(b2Vec2(10,10));
-	}
-
     //////I will add steam inlets and outlets afterwards
   }
-
+	
+void dominos_t::step(settings_t* settings){
+		base_sim_t::step(settings);}
   sim_t *sim = new sim_t("Dominos", dominos_t::create);
 }
