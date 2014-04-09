@@ -180,7 +180,7 @@ namespace cs296
     b2RevoluteJointDef cj;
     b2Vec2 anc;
 
-    float angvel = 3;
+    float angvel = 0;
 
     // wheels
       
@@ -556,7 +556,8 @@ namespace cs296
       bs6.SetAsBox(1.0f,1.0f,b2Vec2(32.0f,6.75f),0);
       fd->shape = &bs6;
       lowerpiston->CreateFixture(fd);
-
+	  
+	  cout<<lowerpiston->GetWorldCenter().x<<" "<<lowerpiston->GetWorldCenter().y<<endl;
 
     //  lowerpiston->SetLinearVelocity( b2Vec2(-100,0));
 
@@ -1189,10 +1190,11 @@ namespace cs296
 		b2BodyDef bd;
 	//	bd.position.Set(47.8,27);
 		bd.type=b2_dynamicBody;
+		bd.bullet=true;
 		b2FixtureDef fd;
 		fd.shape=&shape;
 		fd.restitution=1;
-		fd.density=10000.f;
+		fd.density=10.f;
 		fd.friction=0.0f;
 		fd.filter.categoryBits=0x0006;
 		fd.filter.maskBits=0x0003 | 0x0005;
@@ -1201,13 +1203,13 @@ namespace cs296
 			bd.position.Set(47.8-4,10);       ///////////////////////////////////
 			ball[i]=m_world->CreateBody(&bd);
 			fd1[i]=ball[i]->CreateFixture(&fd);
-			ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
+			ball[i]->SetLinearVelocity(b2Vec2(100+(rand()%10)/10.0,100+(rand()%10)/10.0));
 		}
 		for(int i=20;i<80;i++){
 			bd.position.Set(47.8+4,10);       ///////////////////////////////////
 			ball[i]=m_world->CreateBody(&bd);
 			fd1[i]=ball[i]->CreateFixture(&fd);
-			ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
+			ball[i]->SetLinearVelocity(b2Vec2(100+(rand()%10)/10.0,100+(rand()%10)/10.0));
 		}
 
   }
@@ -1302,9 +1304,10 @@ void dominos_t::step(settings_t* settings){
 				shape.m_radius=0.25f;
 				bd.position.Set(47.8+3,24);
 				bd.type=b2_dynamicBody;
+				bd.bullet=true;
 				b2FixtureDef fd;
 				fd.shape=&shape;
-				fd.density=10000.f;
+				fd.density=10.f;
 				fd.friction=0.0f;
 				fd.restitution=1;
 				fd.filter.categoryBits=0x0006;
@@ -1312,7 +1315,7 @@ void dominos_t::step(settings_t* settings){
 				ball[i]->DestroyFixture(fd1[i]);
 				ball[i]=m_world->CreateBody(&bd);
 				fd1[i]=ball[i]->CreateFixture(&fd);
-				ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
+				ball[i]->SetLinearVelocity(b2Vec2(100+(rand()%10)/10.0,100+(rand()%10)/10.0));
 			}
 		}
 	}
