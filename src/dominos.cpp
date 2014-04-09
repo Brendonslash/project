@@ -180,7 +180,7 @@ namespace cs296
     b2RevoluteJointDef cj;
     b2Vec2 anc;
 
-    float angvel = 0;
+    float angvel = 3;
 
     // wheels
       
@@ -222,6 +222,8 @@ namespace cs296
       wheel3=m_world->CreateBody(&ballbd);
       wheel3->CreateFixture(&ballfd);
       wheel3->SetAngularVelocity(angvel);
+      
+  //    m_world->SetContinuousPhysics(true);
 
     }
 
@@ -338,16 +340,7 @@ namespace cs296
       
 
       b2RevoluteJointDef jd;
-      /*b2Vec2 anchor;
-      
-      anchor.Set(0.0f, 7.0f);
 
-      jd.Initialize(Flycrank, WheelConnection, anchor);
-      m_world->CreateJoint(&jd);
-
-      anchor.Set(2*sqrt(2),7.0+2*sqrt(2));
-      jd.Initialize(Flycrank, wheel2, anchor);
-      m_world->CreateJoint(&jd);*/
 
 	jd.bodyA = Flycrank;
       jd.bodyB = WheelConnection;
@@ -384,6 +377,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Flycrankrod->CreateFixture(fd);
       
 
@@ -422,7 +416,7 @@ namespace cs296
 
       b2FixtureDef *fd = new b2FixtureDef;
       fd->density = 1.0;
-      fd->friction = 0.5;
+      fd->friction = 0;
       fd->restitution = 0.f;
       fd->filter.maskBits=0x0000;
      // fd->filter.groupIndex = -1;
@@ -464,6 +458,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       fd->filter.maskBits= 0x0000;
 
       staticsupport->CreateFixture(fd);
@@ -489,6 +484,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       fd->filter.maskBits = 0x0000;
 
       bd.position.Set(34.0f, 8.0f);
@@ -673,7 +669,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
-      //fd->filter.groupIndex = -1;
+      fd->friction=0.0f; //////////////////// Newly added friction
       fd->filter.maskBits= 0x0000;
       Unionlink->CreateFixture(fd);
       
@@ -706,6 +702,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Combinationlever->CreateFixture(fd);
       
 
@@ -737,6 +734,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Radiusbar->CreateFixture(fd);
 
       shape.SetAsBox(0.01,0.01);
@@ -790,6 +788,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Liftinglink->CreateFixture(fd);
       
 
@@ -821,6 +820,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Liftingarm->CreateFixture(fd);
       
 
@@ -859,6 +859,7 @@ namespace cs296
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
       fd->filter.maskBits= 0x0000;
+      fd->friction=0.0f; //////////////////// Newly added friction      
       Reversearm->CreateFixture(fd);
       
 
@@ -893,6 +894,7 @@ namespace cs296
       fd->density = 1.f;
       fd->shape = new b2PolygonShape;
       fd->shape = &shape;
+      fd->friction=0.0f; //////////////////// Newly added friction
       fd->filter.maskBits= 0x0000;
       Renchrod->CreateFixture(fd);
       
@@ -914,7 +916,7 @@ namespace cs296
       upperpiston = m_world->CreateBody(bd);
 
       b2FixtureDef *fd = new b2FixtureDef;
-      fd->density = 1.0;
+      fd->density = 3.0;
       fd->friction = 0;
       fd->restitution = 1.f;
       fd->filter.maskBits = 0x0000;
@@ -930,11 +932,12 @@ namespace cs296
       
       b2RevoluteJointDef jd;
       b2Vec2 anchor;
-jd.collideConnected = false;
-      bs.SetAsBox(1.5f,2.0f,b2Vec2(48.3,19.0f), 0);
+	  jd.collideConnected = false;
+      bs.SetAsBox(2.0f,2.25f,b2Vec2(48.8,19.0f), 0);
       fd->shape = &bs;
       fd->filter.categoryBits=0x0005;  ///////////////////////////////////////////
       fd->filter.maskBits=0x0006 | 0x0003;      /////////////////////////////////////////////////
+      fd->density=10.f;
       upperpiston->CreateFixture(fd);      
 
       
@@ -988,10 +991,10 @@ jd.collideConnected = false;
 
       b2PolygonShape poly;
       b2Vec2 vertices[4];
-      vertices[0].Set(47.8-1.5,16.75);
-      vertices[1].Set(47.8-1.5,13.25);
-      vertices[2].Set(47.8+1.5,16.75);
-      vertices[3].Set(47.8+1.5,13.25);
+      vertices[0].Set(47.8-3.5,16.75);
+      vertices[1].Set(47.8-3.5,13.25);
+      vertices[2].Set(47.8+3.5,16.75);
+      vertices[3].Set(47.8+3.5,13.25);
       poly.Set(vertices, 4);
 
       
@@ -1149,16 +1152,16 @@ jd.collideConnected = false;
 
       vertices[0].Set(47.8-2.5,30.25); //  Initially it was +-5.5
       vertices[1].Set(47.8-2.4,30.25);
-      vertices[2].Set(47.8-2.4,21.25);
-      vertices[3].Set(47.8-2.5,21.25);
+      vertices[2].Set(47.8-2.4,21.3);
+      vertices[3].Set(47.8-2.5,21.3);
       poly.Set(vertices, 4);
 
       fd->shape = new b2PolygonShape;
       fd->shape = &poly;
       Box->CreateFixture(fd);
       
-      vertices[0].Set(47.8-0.5,21.25); //  Initially it was +-5.5
-      vertices[1].Set(47.8+0.75,21.25);
+      vertices[0].Set(47.8-0.5,21.3); //  Initially it was +-5.5
+      vertices[1].Set(47.8+0.75,21.3);
       vertices[2].Set(47.8+0.75,22.25);
       vertices[3].Set(47.8-0.5,22.25);
       poly.Set(vertices, 4);
@@ -1167,8 +1170,8 @@ jd.collideConnected = false;
       fd->shape = &poly;
       Box->CreateFixture(fd);      
       
-      vertices[0].Set(47.8+2.5,21.25); //  Initially it was +-5.5
-      vertices[1].Set(47.8+4.5,21.25);
+      vertices[0].Set(47.8+2.5,21.3); //  Initially it was +-5.5
+      vertices[1].Set(47.8+4.5,21.3);
       vertices[2].Set(47.8+4.5,22.25);
       vertices[3].Set(47.8+2.5,22.25);
       poly.Set(vertices, 4);
@@ -1182,23 +1185,30 @@ jd.collideConnected = false;
   // Steam  
     {
 		b2CircleShape shape;
-		shape.m_radius=0.3f;
+		shape.m_radius=0.25f;
 		b2BodyDef bd;
-		bd.position.Set(47.8,27);
+	//	bd.position.Set(47.8,27);
 		bd.type=b2_dynamicBody;
 		b2FixtureDef fd;
 		fd.shape=&shape;
 		fd.restitution=1;
-		fd.density=1000.f;
+		fd.density=10000.f;
+		fd.friction=0.0f;
 		fd.filter.categoryBits=0x0006;
 		fd.filter.maskBits=0x0003 | 0x0005;
 		
-		for(int i=0;i<40;i++){
+		for(int i=0;i<20;i++){
+			bd.position.Set(47.8-4,10);       ///////////////////////////////////
 			ball[i]=m_world->CreateBody(&bd);
 			fd1[i]=ball[i]->CreateFixture(&fd);
-			ball[i]->SetLinearVelocity(b2Vec2(20+rand()%5,20+rand()%5));
+			ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
 		}
-		
+		for(int i=20;i<80;i++){
+			bd.position.Set(47.8+4,10);       ///////////////////////////////////
+			ball[i]=m_world->CreateBody(&bd);
+			fd1[i]=ball[i]->CreateFixture(&fd);
+			ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
+		}
 
   }
   //train
@@ -1257,7 +1267,7 @@ jd.collideConnected = false;
 		rj.Initialize(wheel3,train,wheel3->GetWorldCenter());
 		m_world->CreateJoint(&rj);
 		
-	/*	b2RevoluteJointDef rj;
+		b2RevoluteJointDef rj;
 		rj.bodyA=wheel1;
 		rj.bodyB=train;
 		rj.collideConnected=false;
@@ -1277,7 +1287,7 @@ jd.collideConnected = false;
 		rj.collideConnected=false;
 		rj.localAnchorA.Set(0,0);
 		rj.localAnchorB.Set(22,10);
-		m_world->CreateJoint(&rj); */
+		m_world->CreateJoint(&rj); 
 						
 	} */
 
@@ -1285,23 +1295,24 @@ jd.collideConnected = false;
 	
 void dominos_t::step(settings_t* settings){
 		base_sim_t::step(settings);
-		for(int i=0;i<40;i++){
+		for(int i=0;i<80;i++){
 			if(ball[i]->GetWorldCenter().y>32){
 				b2BodyDef bd;
 				b2CircleShape shape;
-				shape.m_radius=0.3f;
+				shape.m_radius=0.25f;
 				bd.position.Set(47.8+3,24);
 				bd.type=b2_dynamicBody;
 				b2FixtureDef fd;
 				fd.shape=&shape;
-				fd.density=1000.f;
+				fd.density=10000.f;
+				fd.friction=0.0f;
 				fd.restitution=1;
 				fd.filter.categoryBits=0x0006;
 				fd.filter.maskBits=0x0003;	
 				ball[i]->DestroyFixture(fd1[i]);
 				ball[i]=m_world->CreateBody(&bd);
 				fd1[i]=ball[i]->CreateFixture(&fd);
-				ball[i]->SetLinearVelocity(b2Vec2(20+rand()%5,20+rand()%5));
+				ball[i]->SetLinearVelocity(b2Vec2(3+(rand()%10)/10.0,3+(rand()%10)/10.0));
 			}
 		}
 	}

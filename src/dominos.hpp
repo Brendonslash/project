@@ -41,8 +41,8 @@ namespace cs296
     }
     
     void step(settings_t* settings);
-    b2Body* ball[40];
-    b2Fixture* fd1[40];
+    b2Body* ball[80];
+    b2Fixture* fd1[80];
   };
 }
   
