@@ -120,6 +120,9 @@ namespace cs296
     
     base_sim_t();//!< initializes the world
 
+	inline b2World* get_World(void){
+		return m_world;
+	}
     //! Virtual destructors - amazing objects. Why are these necessary?
     virtual ~base_sim_t();//!< First destroys every object dependant on the current simulation and then destroys the complete simulation recursively.
     
@@ -130,6 +133,8 @@ namespace cs296
 
     virtual void keyboard(unsigned char key) { B2_NOT_USED(key); }
     virtual void keyboard_up(unsigned char key) { B2_NOT_USED(key); }
+    
+    
 
     void shift_mouse_down(const b2Vec2& p) { B2_NOT_USED(p); }
     virtual void mouse_down(const b2Vec2& p) { B2_NOT_USED(p); }

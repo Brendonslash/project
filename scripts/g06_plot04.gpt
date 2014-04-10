@@ -1,0 +1,13 @@
+set title "Plot 4"
+bin(x, s) = s*int(x/s)
+stats '../data/temp_col.dat' u 1 nooutput
+bn = 20
+bw = (STATS_max-STATS_min)/20
+set boxwidth bw*0.6
+set style fill solid 0.4
+set xlabel "Bins"
+set ylabel "Frequency"
+set term png
+set output "../plots/g06_plot04.png"
+plot "../data/temp_col.dat" using (bin($1,bw)+bw/2):(1.0) smooth frequency t 'Frequency' w boxes, \
+"../data/temp_col.dat" using ($1):(1) smooth cumulative t 'Cumulative' w lines

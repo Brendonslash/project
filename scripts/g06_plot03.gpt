@@ -1,0 +1,8 @@
+set title "3rd plot"
+set xlabel "Iterations"
+set ylabel "Average step time"
+set term png
+set output "../plots/g06_plot03.png"
+plot "../data/temp_ebars.dat" u 1:2 t "Avg step time" w lines, \
+"../data/temp_ebars.dat" u 1:2:3 t " Error bars" w yerrorbars
+

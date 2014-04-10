@@ -62,42 +62,10 @@ struct point{
 namespace cs296
 {
 
-    b2Body* b1;  
-    b2Body* wheel1;
-    b2Body* wheel2;
-    b2Body* wheel3;
-    b2Body* WheelConnection;
-    b2Body* Flycrank;
-    b2Body* Flycrankrod;
-    b2Body* SupportFlycrank;
-    b2Body* staticsupport;
-    b2Body* staticbardown;
-    b2Body* staticbarup;
-    b2Body* lowerpiston;
-    b2Body* upperpiston;
-    b2Body* longarm;
-    b2Body* Unionlink;
-    b2Body* Combinationlever;
-    b2Body* Radiusbar;
-    b2Body* Liftinglink;
-    b2Body* armrest;
-    b2Body* Liftingarm;
-    b2Body* Reversearm;
-    b2Body* Renchrod;
-    b2Body* pistonrest;
-    b2RevoluteJointDef ju;
-    b2Joint* desjoin;
-    b2Joint* desprism;
-    b2Body* Box;
-    b2Body* train;
-    b2Body* help1;
-    b2Body* help2;
-    bool b = true;
-    float angvel = 5;
+
     
-      b2RevoluteJointDef movj;
-      b2PrismaticJointDef pjoint;
-      b2WheelJointDef wjoint;
+     bool b = true;
+    float angvel = 5;
 
     void dominos_t :: keyboard(unsigned char key)
     {   
@@ -150,9 +118,9 @@ namespace cs296
             ju.Initialize(Radiusbar,SupportFlycrank,b2Vec2(pu.x,pu.y));
             desjoin = m_world->CreateJoint(&ju);
 
-            wheel1->SetAngularVelocity(angvel);
-            wheel2->SetAngularVelocity(angvel);
-            wheel3->SetAngularVelocity(angvel);
+            wheel1->SetAngularVelocity(-1*angvel);
+            wheel2->SetAngularVelocity(-1*angvel);
+            wheel3->SetAngularVelocity(-1*angvel);
 
             callbacks_t::keyboard_cb('p',1,1);
             when = !when;
@@ -190,9 +158,9 @@ namespace cs296
 
             callbacks_t::keyboard_cb('r',1,1);
             
-            wheel1->SetAngularVelocity(-1*angvel);
+            wheel1->SetAngularVelocity(0);
             wheel2->SetAngularVelocity(-1*angvel);
-            wheel3->SetAngularVelocity(-1*angvel);
+            wheel3->SetAngularVelocity(0);
 
             callbacks_t::keyboard_cb('p',1,1);
 
@@ -233,19 +201,14 @@ namespace cs296
      * \b "b2BodyDef" is the data type used to define the body.
      * 
      * \b "b2FixtureDef" defines the fixture of the body.Fixture is defined for a particular Body.It contains the properties of the 
-     * body such as mass,restitution,state etc,mostly everything except the dimensions of the body(that is shape).
+     * body such as mass,restitution,state etc,mostly everything .
      * 
      * \b "CreateFixture" helps Create a fixture which is defined with some particular propreties.
      * 
      */ 
     
     {
-      /*!
-       * \subsection a16 Ground
-       * \li \b "b1" is the pointer to the class which contains the properties of Ground like its fixture,shape and state.
-       * \li \b "shape" defines its shape,here it is a line segment so b2EdgeShape is used.
-       * \li \b "bd" variable sets the body of Ground. 
-       */
+      
       b2EdgeShape shape; 
       shape.Set(b2Vec2(-90.0f, 0.0f), b2Vec2(90.0f, 0.0f));
       b2BodyDef bd; 
@@ -262,15 +225,7 @@ namespace cs296
     // wheels
       
     {      
-      /**
-       * Here we define the wheels of our steam engine.
-       * The maskBits when set to 0 make an object immune to
-       * collisions. This is done because we just want the wheels to rotate
-       * because of the shaft motion and not collide with them.
-       * It has been made of type kinematic to test it when there is no steam
-       * in which case a constant angular velocity has been applied to it so that
-       * we can test the correctness of the system.
-       */
+      
       b2CircleShape circle;
       circle.m_radius=10.0;
       b2FixtureDef ballfd;
@@ -286,19 +241,19 @@ namespace cs296
       ballbd.position.Set(-22.0f,10.0f);
       wheel1=m_world->CreateBody(&ballbd);
       wheel1->CreateFixture(&ballfd);
-      wheel1->SetAngularVelocity(angvel);
+   //   wheel1->SetAngularVelocity(angvel);
 
-
+	  ballbd.type=b2_kinematicBody;
       ballbd.position.Set(-0.0f,10.0f);
       wheel2=m_world->CreateBody(&ballbd);
       wheel2->CreateFixture(&ballfd);
       wheel2->SetAngularVelocity(angvel);
 
-
+	  ballbd.type=b2_dynamicBody;
       ballbd.position.Set(22.0f,10.0f);
       wheel3=m_world->CreateBody(&ballbd);
       wheel3->CreateFixture(&ballfd);
-      wheel3->SetAngularVelocity(angvel);
+    //  wheel3->SetAngularVelocity(angvel);
 
       b=true;
 
@@ -308,11 +263,9 @@ namespace cs296
 
     
     
-      /**
-       * Revolute joints have been set at the center of the wheel
-       * to allow it to rotate and connect it to the. //Check
-       */
+      
     {
+      
       b2CircleShape circle;
       circle.m_radius=10.0;
       b2BodyDef bd;

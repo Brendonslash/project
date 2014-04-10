@@ -1,0 +1,15 @@
+set title "Plot 5"
+set xlabel "Iteration number"
+set ylabel "Average steptime for iteration"
+f1(x) = a1*x+b1
+a1 = 1; b1 = 1;
+fit f1(x) "../data/temp_avg_05.dat" using 1:3 via a1, b1
+f2(x) = a2*x + b2
+a2 = 1; b2 = 1;
+fit f2(x) "../data/temp_avg_05.dat" using 1:2 via a2,b2
+set term png
+set output "../plots/g06_plot05.png"
+plot "../data/temp_avg_05.dat" u 1:3 t "g06_lab05data_random.csv", \
+"../data/temp_avg_05.dat" u 1:2 t "g06_lab05data_02.csv", \
+a1*x + b1, \
+a2*x + b2 

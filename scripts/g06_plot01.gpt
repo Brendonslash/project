@@ -1,0 +1,14 @@
+set title "1st plot"
+set boxwidth 0.5
+set xlabel "Iteration values"
+set ylabel "Average over re-runs"
+#plot "helper11.dat" u 1:2 t "Step time averages" with boxes, \
+#"helper12.dat" u 1:2 t "Loop time averages" with lines
+stats "../data/temp_avg_01.dat" u 1:3 nooutput
+set label 1 "Maximum" at STATS_pos_max_y, STATS_max_y offset 1,-0.5
+set label 2 "Minimum" at STATS_pos_min_y, STATS_min_y offset 1,0.5
+#plot "
+set term png
+set output "../plots/g06_plot01.png"
+plot "../data/temp_avg_01.dat" u 1:2 t "Step time averages" with boxes, \
+"../data/temp_avg_01.dat" u 1:3 t "Loop time averages" with lines
