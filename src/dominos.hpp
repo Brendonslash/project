@@ -41,8 +41,10 @@ namespace cs296
     }
     
     void step(settings_t* settings);
-    b2Body* ball[80];
-    b2Fixture* fd1[80];
+    void keyboard(unsigned char key);
+    b2Body* ball[60];
+    b2Fixture* fd1[60];
+    b2Body* lowerpiston;
   };
 }
   

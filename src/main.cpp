@@ -114,6 +114,8 @@ void create_glui_ui(void)
 //! This is the main function
 int main(int argc, char** argv)
 {
+	settings.velocity_iterations = 400;
+	settings.position_iterations = 80;
   test_count = 1;
   test_index = 0;
   test_selection = test_index;
